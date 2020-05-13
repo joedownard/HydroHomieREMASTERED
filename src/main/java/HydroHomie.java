@@ -11,7 +11,7 @@ public class HydroHomie extends Application {
         Parent root = FXMLLoader.load(getClass().getResource("main.fxml"));
 
         primaryStage.setTitle("HydroHomie REMASTERED EDITION");
-        primaryStage.setScene(new Scene(root, 580, 398));
+        primaryStage.setScene(new Scene(root, 580, 320));
         primaryStage.show();
         primaryStage.setResizable(false);
         primaryStage.setMinWidth(primaryStage.getWidth());
