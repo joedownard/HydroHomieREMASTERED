@@ -3,6 +3,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -51,6 +52,20 @@ public class User {
             }
         }
         return totalVolume;
+    }
+
+    public ArrayList<Double> getLowerUpperBound () {
+        double min = new Date().getTime();
+        double max = 0d;
+        for (Record rec : records) {
+            if (rec.getDate().getTime() > max) max = rec.getDate().getTime();
+            if (rec.getDate().getTime() < min) min = rec.getDate().getTime();
+        }
+        for (Goal goal : dailyGoals) {
+            if (goal.getCreationDate().getTime() > max) max = goal.getCreationDate().getTime();
+            if (goal.getCreationDate().getTime() < min) min = goal.getCreationDate().getTime();
+        }
+        return new ArrayList<>(Arrays.asList(min-21600000, max+21600000));
     }
 
     public boolean addGoal (String volume, String points) {
