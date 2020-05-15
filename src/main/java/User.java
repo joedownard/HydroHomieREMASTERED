@@ -35,6 +35,13 @@ public class User {
         if (getCurrentDailyGoal() == null) return 0f;
 
         float progress = 0f;
+
+        progress = (float)getVolumeToday() / (float)getCurrentDailyGoal().getTargetVolume();
+
+        return progress;
+    }
+
+    public int getVolumeToday () {
         int totalVolume = 0;
         Date todayDate = Utils.stripDate(new Date());
 
@@ -43,10 +50,7 @@ public class User {
                 totalVolume += rec.getVolume();
             }
         }
-
-        progress = (float)totalVolume / (float)getCurrentDailyGoal().getTargetVolume();
-
-        return progress;
+        return totalVolume;
     }
 
     public boolean addGoal (String volume, String points) {
@@ -95,4 +99,23 @@ public class User {
     }
 
 
+    public boolean editGoal(Goal goalEditing, String volume, String points) {
+        if (getCurrentDailyGoal() == null) return false;
+
+        try {
+            int newVolume = Integer.parseInt(volume);
+            int newPoints = Integer.parseInt(points);
+
+            for (Goal goal : dailyGoals) {
+                if (goal.matches(goalEditing)) {
+                    goal.setTargetVolume(newVolume);
+                    goal.setPoints(newPoints);
+                    return true;
+                }
+            }
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+        return true;
+    }
 }

@@ -19,6 +19,8 @@ import java.util.ResourceBundle;
 
 public class MainController {
 
+    @FXML private Label dailyGoalVolumeLabel;
+    @FXML private Label volumeTodayLabel;
     @FXML private TableView<Record> recordsTable;
 
     @FXML private TableColumn<Record, String> date;
@@ -61,6 +63,14 @@ public class MainController {
     }
 
     public void editRecordButtonClicked(MouseEvent mouseEvent) throws IOException {
+        if (recordsTable.getSelectionModel().getSelectedItem() == null) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Failed to edit record");
+            alert.setHeaderText(null);
+            alert.setContentText("No record selected!");
+            alert.showAndWait();
+            return;
+        }
         FXMLLoader loader = new FXMLLoader(getClass().getResource("addRecord.fxml"));
         Parent addRecordGUI = loader.load();
 
@@ -83,7 +93,24 @@ public class MainController {
         stage.setScene(new Scene(addGoalGUI));
     }
 
-    public void editGoalButtonClicked(MouseEvent mouseEvent) {
+    public void editGoalButtonClicked(MouseEvent mouseEvent) throws IOException {
+        if (getUser().getCurrentDailyGoal() == null) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Failed to edit record");
+            alert.setHeaderText(null);
+            alert.setContentText("There is no current daily goal to edit!");
+            alert.showAndWait();
+            return;
+        }
+
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("addGoal.fxml"));
+        Parent addGoalGUI = loader.load();
+
+        AddGoalController addGoalController = loader.getController();
+        addGoalController.setEditing(getUser().getCurrentDailyGoal());
+
+        Stage stage = (Stage) addGoalButton.getScene().getWindow();
+        stage.setScene(new Scene(addGoalGUI));
     }
 
     public void graphsButtonClicked(MouseEvent mouseEvent) {
@@ -104,7 +131,16 @@ public class MainController {
     public void update () {
         writeToFile();
 
-        dailyProgressBar.setProgress(getUser().getDailyGoalProgress());
+        if (getUser().getCurrentDailyGoal() != null) {
+            dailyProgressBar.setProgress(getUser().getDailyGoalProgress());
+            dailyGoalVolumeLabel.setText(getUser().getCurrentDailyGoal().getTargetVolume() + "ml");
+        } else {
+            dailyProgressBar.setVisible(false);
+            dailyGoalVolumeLabel.setVisible(false);
+            dailyGoalLabel.setVisible(false);
+        }
+
+        volumeTodayLabel.setText(getUser().getVolumeToday() + "ml");
 
         if (!user.getRecords().isEmpty()) {
             recordsTable.getItems().setAll(user.getRecords());

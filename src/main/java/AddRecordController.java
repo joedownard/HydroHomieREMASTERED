@@ -17,8 +17,8 @@ import java.util.ResourceBundle;
 
 public class AddRecordController {
 
-    boolean editing = false;
-    Record recordEditing = null;
+    boolean editing;
+    Record recordEditing;
 
     @FXML private Label volumeErrorLabel;
     @FXML private Label dateErrorLabel;
@@ -32,6 +32,9 @@ public class AddRecordController {
 
     @FXML
     public void initialize() {
+        editing = false;
+        recordEditing = null;
+
         volumeField.setText("400");
         typeField.getItems().setAll(LiquidType.values());
         typeField.setValue(LiquidType.WATER);
@@ -66,7 +69,7 @@ public class AddRecordController {
         }
         if (!result) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Failed to create/edit recortd!");
+            alert.setTitle("Failed to create/edit record!");
             alert.setHeaderText(null);
             alert.setContentText("Failed to create/edit record.");
             alert.showAndWait();
@@ -87,15 +90,12 @@ public class AddRecordController {
             typeField.setValue(LiquidType.WATER);
             dateField.setText(new SimpleDateFormat("dd/MM/yyyy HH:mm").format(new Date()));
         }
-        volumeField.setText("400");
-        typeField.getItems().setAll(LiquidType.values());
-        typeField.setValue(LiquidType.WATER);
-        dateField.setText(new SimpleDateFormat("dd/MM/yyyy HH:mm").format(new Date()));
     }
 
     public void exitButtonClicked(MouseEvent mouseEvent) throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("main.fxml"));
         Parent mainGUI = loader.load();
+
         Stage stage = (Stage) addButton.getScene().getWindow();
         stage.setScene(new Scene(mainGUI, 580, 320));
     }
