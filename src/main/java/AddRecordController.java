@@ -39,7 +39,7 @@ public class AddRecordController {
     }
 
     public void addButtonClicked(MouseEvent keyEvent) throws IOException {
-        boolean result = false;
+        Response response = Response.ADDRECFAILURE;
 
         FXMLLoader loader = new FXMLLoader(getClass().getResource("main.fxml"));
         Parent mainGUI = loader.load();
@@ -60,17 +60,42 @@ public class AddRecordController {
 
         MainController mainController =  loader.getController();
         if (editing) {
-            result = mainController.getUser().editRecord(recordEditing, volumeField.getText(), typeField.getValue(), dateField.getText());
+            response = mainController.getUser().editRecord(recordEditing, volumeField.getText(), typeField.getValue(), dateField.getText());
         } else {
-            result = mainController.getUser().addRecord(volumeField.getText(), typeField.getValue(), dateField.getText());
+            response = mainController.getUser().addRecord(volumeField.getText(), typeField.getValue(), dateField.getText());
         }
-        if (!result) {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Failed to create/edit record!");
+        if (response == Response.ADDRECSUCCESSGOALCOMPLETE) {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Goal complete!");
             alert.setHeaderText(null);
-            alert.setContentText("Failed to create/edit record.");
+            alert.setContentText("You have reached your daily goal! You have been awarded " + mainController.getUser().getCurrentDailyGoal().getPoints() + " points!");
+            alert.showAndWait();
+        } else if (response == Response.ADDRECFAILURE) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Failed to create record!");
+            alert.setHeaderText(null);
+            alert.setContentText("Failed to create record.");
+            alert.showAndWait();
+        } else if (response == Response.EDITRECFAILURE) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Failed to edit record!");
+            alert.setHeaderText(null);
+            alert.setContentText("Failed to edit record.");
+            alert.showAndWait();
+        } else if (response == Response.EDITRECSUCCESSGOALCOMPLETE) {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Goal complete!");
+            alert.setHeaderText(null);
+            alert.setContentText("You have reached your daily goal! You have been awarded " + mainController.getUser().getCurrentDailyGoal().getPoints() + " points!");
+            alert.showAndWait();
+        } else if (response == Response.EDITRECSUCCESSGOALINCOMPLETE) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Goal no longer complete!");
+            alert.setHeaderText(null);
+            alert.setContentText("Editing this record caused you to not fulfill the daily goal! You have lost "+ mainController.getUser().getCurrentDailyGoal().getPoints() + " points!");
             alert.showAndWait();
         }
+
         mainController.update();
 
         Stage stage = (Stage) addButton.getScene().getWindow();

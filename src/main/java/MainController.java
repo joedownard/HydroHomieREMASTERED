@@ -140,6 +140,7 @@ public class MainController {
             dailyGoalLabel.setVisible(false);
         }
 
+        pointsValueLabel.setText(String.valueOf(getUser().getPoints()));
         volumeTodayLabel.setText(getUser().getVolumeToday() + "ml");
 
         if (!user.getRecords().isEmpty()) {

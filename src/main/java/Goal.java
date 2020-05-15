@@ -3,8 +3,9 @@ import java.util.Date;
 public class Goal {
 
     private int targetVolume;
-    int points;
+    private int points;
     private Date creationDate;
+    private boolean completed;
 
     public Goal (){
 
@@ -32,6 +33,10 @@ public class Goal {
         return points;
     }
 
+    public boolean isCompleted() {
+        return completed;
+    }
+
     public void setCreationDate(Date creationDate) {
         this.creationDate = creationDate;
     }
@@ -42,5 +47,9 @@ public class Goal {
 
     public void setPoints(int points) {
         this.points = points;
+    }
+
+    public void setCompleted(boolean completed) {
+        this.completed = completed;
     }
 }

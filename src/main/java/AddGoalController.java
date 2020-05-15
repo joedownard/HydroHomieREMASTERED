@@ -32,7 +32,7 @@ public class AddGoalController {
     }
 
     public void addButtonClicked(MouseEvent keyEvent) throws IOException {
-        boolean result = false;
+        Response response = Response.ADDGOALFAILURE;
         FXMLLoader loader = new FXMLLoader(getClass().getResource("main.fxml"));
         Parent mainGUI = loader.load();
 
@@ -54,16 +54,22 @@ public class AddGoalController {
 
         MainController mainController =  loader.getController();
         if (editing) {
-            result = mainController.getUser().editGoal(goalEditing, volumeField.getText(), pointsField.getText());
+            response = mainController.getUser().editGoal(goalEditing, volumeField.getText(), pointsField.getText());
         } else {
-            result = mainController.getUser().addGoal(volumeField.getText(), pointsField.getText());
+            response = mainController.getUser().addGoal(volumeField.getText(), pointsField.getText());
         }
 
-        if (!result) {
+        if (response == Response.ADDGOALFAILURE) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Failed to create/edit goal!");
+            alert.setTitle("Failed to create goal!");
             alert.setHeaderText(null);
-            alert.setContentText("Failed to create/edit goal.");
+            alert.setContentText("Failed to create goal. Goal already exists!");
+            alert.showAndWait();
+        } else if (response == Response.EDITGOALFAILURE){
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Failed to ediy goal!");
+            alert.setHeaderText(null);
+            alert.setContentText("Failed to edit goal.");
             alert.showAndWait();
         }
         mainController.update();

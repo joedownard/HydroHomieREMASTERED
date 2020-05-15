@@ -11,9 +11,14 @@ public class User {
 
     private ArrayList<Record> records = new ArrayList<>();
     private ArrayList<Goal> dailyGoals = new ArrayList<>();
+    private int points = 0;
 
     public User () {
 
+    }
+
+    public int getPoints() {
+        return points;
     }
 
     public ArrayList<Goal> getDailyGoals() {
@@ -68,8 +73,8 @@ public class User {
         return new ArrayList<>(Arrays.asList(min-21600000, max+21600000));
     }
 
-    public boolean addGoal (String volume, String points) {
-        if (getCurrentDailyGoal() != null) return false;
+    public Response addGoal (String volume, String points) {
+        if (getCurrentDailyGoal() != null) return Response.ADDGOALFAILURE;
 
         try {
             int newVolume = Integer.parseInt(volume);
@@ -77,24 +82,34 @@ public class User {
 
             dailyGoals.add(new Goal(newVolume, newPoints));
         } catch (IllegalArgumentException e) {
-            return false;
+            return Response.ADDGOALFAILURE;
         }
-        return true;
+        return Response.ADDGOALSUCCESS;
     }
 
-    public boolean addRecord (String volume, LiquidType type, String date) {
+    public Response addRecord (String volume, LiquidType type, String date) {
+        Response response = Response.ADDRECSUCCESS;
         try {
             int newVolume = Integer.parseInt(volume);
             Date newDate = new SimpleDateFormat("dd/MM/yyyy HH:mm").parse(date);
 
+            if (getCurrentDailyGoal() != null) {
+                if (getVolumeToday() + newVolume >= getCurrentDailyGoal().getTargetVolume() && !getCurrentDailyGoal().isCompleted()) {
+                    getCurrentDailyGoal().setCompleted(true);
+                    points += getCurrentDailyGoal().getPoints();
+                    response = Response.ADDRECSUCCESSGOALCOMPLETE;
+                }
+            }
+
             records.add(new Record(newDate, type, newVolume));
         } catch (IllegalArgumentException | ParseException e) {
-            return false;
+            response = Response.ADDRECFAILURE;
         }
-        return true;
+        return response;
     }
 
-    public boolean editRecord (Record recordToEdit, String volume, LiquidType type, String date) {
+    public Response editRecord (Record recordToEdit, String volume, LiquidType type, String date) {
+        Response response = Response.EDITRECFAILURE;
         try {
             int newVolume = Integer.parseInt(volume);
             Date newDate = new SimpleDateFormat("dd/MM/yyyy HH:mm").parse(date);
@@ -104,18 +119,30 @@ public class User {
                     rec.setDate(newDate);
                     rec.setLiquidType(type);
                     rec.setVolume(newVolume);
-                    return true;
+                    response = Response.EDITRECSUCCESS;
+
+                    if (getCurrentDailyGoal() != null) {
+                        if (getVolumeToday() < getCurrentDailyGoal().getTargetVolume() && getCurrentDailyGoal().isCompleted()) {
+                            getCurrentDailyGoal().setCompleted(false);
+                            response = Response.EDITRECSUCCESSGOALINCOMPLETE;
+                            points -= getCurrentDailyGoal().getPoints();
+
+                        } else if (getVolumeToday() >= getCurrentDailyGoal().getTargetVolume() && !getCurrentDailyGoal().isCompleted()){
+                            response = Response.EDITRECSUCCESSGOALCOMPLETE;
+                            points += getCurrentDailyGoal().getPoints();
+                        }
+                    }
                 }
             }
         } catch (IllegalArgumentException | ParseException e) {
-            return false;
+            response = Response.EDITRECFAILURE;
         }
-        return false;
+        return response;
     }
 
 
-    public boolean editGoal(Goal goalEditing, String volume, String points) {
-        if (getCurrentDailyGoal() == null) return false;
+    public Response editGoal(Goal goalEditing, String volume, String points) {
+        if (getCurrentDailyGoal() == null) return Response.EDITGOALFAILURE;
 
         try {
             int newVolume = Integer.parseInt(volume);
@@ -125,12 +152,12 @@ public class User {
                 if (goal.matches(goalEditing)) {
                     goal.setTargetVolume(newVolume);
                     goal.setPoints(newPoints);
-                    return true;
+                    return Response.EDITGOALSUCCESS;
                 }
             }
         } catch (IllegalArgumentException e) {
-            return false;
+            return Response.EDITGOALFAILURE;
         }
-        return true;
+        return Response.EDITGOALFAILURE;
     }
 }
