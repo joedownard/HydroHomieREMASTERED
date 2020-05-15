@@ -1,13 +1,21 @@
+import sun.nio.ch.Util;
+
 import java.util.Date;
 
 public class Goal {
 
     private int targetVolume;
+    int points;
     private Date creationDate;
 
-    public Goal (int targetVolume, Date creationDate) {
+    public Goal (){
+
+    }
+
+    public Goal (int targetVolume, int points) {
         this.targetVolume = targetVolume;
-        this.creationDate = creationDate;
+        this.points = points;
+        this.creationDate = Utils.stripDate(new Date());
     }
 
     public Date getCreationDate() {

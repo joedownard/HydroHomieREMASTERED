@@ -31,17 +31,48 @@ public class User {
         return null;
     }
 
+    public float getDailyGoalProgress () {
+        if (getCurrentDailyGoal() == null) return 0f;
+
+        float progress = 0f;
+        int totalVolume = 0;
+        Date todayDate = Utils.stripDate(new Date());
+
+        for (Record rec : records) {
+            if (Utils.stripDate(rec.getDate()).equals(todayDate)) {
+                totalVolume += rec.getVolume();
+            }
+        }
+
+        progress = (float)totalVolume / (float)getCurrentDailyGoal().getTargetVolume();
+
+        return progress;
+    }
+
+    public boolean addGoal (String volume, String points) {
+        if (getCurrentDailyGoal() != null) return false;
+
+        try {
+            int newVolume = Integer.parseInt(volume);
+            int newPoints = Integer.parseInt(points);
+
+            dailyGoals.add(new Goal(newVolume, newPoints));
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+        return true;
+    }
+
     public boolean addRecord (String volume, LiquidType type, String date) {
-        boolean success = true;
         try {
             int newVolume = Integer.parseInt(volume);
             Date newDate = new SimpleDateFormat("dd/MM/yyyy HH:mm").parse(date);
 
             records.add(new Record(newDate, type, newVolume));
         } catch (IllegalArgumentException | ParseException e) {
-            return success = false;
+            return false;
         }
-        return success;
+        return true;
     }
 
 

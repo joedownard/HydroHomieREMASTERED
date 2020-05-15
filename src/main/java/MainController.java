@@ -17,7 +17,7 @@ import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
 
-public class MainController implements Initializable {
+public class MainController {
 
     @FXML private TableView<Record> recordsTable;
 
@@ -42,24 +42,22 @@ public class MainController implements Initializable {
 
     User user;
 
-    @Override
-    public void initialize(URL url, ResourceBundle resourceBundle) {
+    @FXML
+    public void initialize() {
         readFromFile();
         date.setCellValueFactory(new PropertyValueFactory<>("formattedDate"));
         type.setCellValueFactory(new PropertyValueFactory<>("liquidType"));
         volume.setCellValueFactory(new PropertyValueFactory<>("volume"));
 
-        if (user != null) {
-            if (user.getRecords() != null) {
-                recordsTable.getItems().setAll(user.getRecords());
-            }
-        };
+        update();
     }
 
     public void addRecordButtonClicked(MouseEvent mouseEvent) throws IOException {
-        Parent addGUI = FXMLLoader.load(getClass().getResource("addRecord.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("addRecord.fxml"));
+        Parent addRecordGUI = loader.load();
+
         Stage stage = (Stage) addRecordButton.getScene().getWindow();
-        stage.setScene(new Scene(addGUI));
+        stage.setScene(new Scene(addRecordGUI));
     }
 
     public void editRecordButtonClicked(MouseEvent mouseEvent) {
@@ -68,7 +66,12 @@ public class MainController implements Initializable {
     public void deleteRecordButtonClicked(MouseEvent mouseEvent) {
     }
 
-    public void addGoalButtonClicked(MouseEvent mouseEvent) {
+    public void addGoalButtonClicked(MouseEvent mouseEvent) throws IOException {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("addGoal.fxml"));
+        Parent addGoalGUI = loader.load();
+
+        Stage stage = (Stage) addGoalButton.getScene().getWindow();
+        stage.setScene(new Scene(addGoalGUI));
     }
 
     public void editGoalButtonClicked(MouseEvent mouseEvent) {
@@ -78,14 +81,22 @@ public class MainController implements Initializable {
     }
 
     public void factButtonClicked(MouseEvent mouseEvent) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Water Fact");
+        alert.setHeaderText(null);
+        alert.setContentText("Water is a liquid!");
+        alert.showAndWait();
     }
 
     public User getUser() {
         return user;
     }
 
-    public void updateTable () {
+    public void update () {
         writeToFile();
+
+        dailyProgressBar.setProgress(getUser().getDailyGoalProgress());
+
         if (!user.getRecords().isEmpty()) {
             recordsTable.getItems().setAll(user.getRecords());
         } else {
