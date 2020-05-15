@@ -60,7 +60,16 @@ public class MainController {
         stage.setScene(new Scene(addRecordGUI));
     }
 
-    public void editRecordButtonClicked(MouseEvent mouseEvent) {
+    public void editRecordButtonClicked(MouseEvent mouseEvent) throws IOException {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("addRecord.fxml"));
+        Parent addRecordGUI = loader.load();
+
+        AddRecordController addRecordController = loader.getController();
+        addRecordController.setEditing(recordsTable.getSelectionModel().getSelectedItem());
+
+        Stage stage = (Stage) addRecordButton.getScene().getWindow();
+        stage.setScene(new Scene(addRecordGUI));
+
     }
 
     public void deleteRecordButtonClicked(MouseEvent mouseEvent) {

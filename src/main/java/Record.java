@@ -20,6 +20,10 @@ public class Record {
         this.volume = newVolume;
     }
 
+    public boolean matches (Record rec) {
+        return this.getVolume() == rec.getVolume() && this.getLiquidType() == rec.getLiquidType() && this.getDate().getTime() == rec.getDate().getTime();
+    }
+
     public Date getDate () {
         return date;
     }

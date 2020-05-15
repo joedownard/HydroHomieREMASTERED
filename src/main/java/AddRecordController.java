@@ -17,6 +17,8 @@ import java.util.ResourceBundle;
 
 public class AddRecordController {
 
+    boolean editing = false;
+    Record recordEditing = null;
 
     @FXML private Label volumeErrorLabel;
     @FXML private Label dateErrorLabel;
@@ -37,6 +39,8 @@ public class AddRecordController {
     }
 
     public void addButtonClicked(MouseEvent keyEvent) throws IOException {
+        boolean result = false;
+
         FXMLLoader loader = new FXMLLoader(getClass().getResource("main.fxml"));
         Parent mainGUI = loader.load();
 
@@ -55,12 +59,16 @@ public class AddRecordController {
         }
 
         MainController mainController =  loader.getController();
-        boolean result = mainController.getUser().addRecord(volumeField.getText(), typeField.getValue(), dateField.getText());
+        if (editing) {
+            result = mainController.getUser().editRecord(recordEditing, volumeField.getText(), typeField.getValue(), dateField.getText());
+        } else {
+            result = mainController.getUser().addRecord(volumeField.getText(), typeField.getValue(), dateField.getText());
+        }
         if (!result) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Failed to create recortd!");
+            alert.setTitle("Failed to create/edit recortd!");
             alert.setHeaderText(null);
-            alert.setContentText("Failed to create record.");
+            alert.setContentText("Failed to create/edit record.");
             alert.showAndWait();
         }
         mainController.update();
@@ -70,6 +78,15 @@ public class AddRecordController {
     }
 
     public void resetButtonClicked(MouseEvent mouseEvent) {
+        if (editing) {
+            volumeField.setText(String.valueOf(recordEditing.getVolume()));
+            typeField.setValue(recordEditing.getLiquidType());
+            dateField.setText(new SimpleDateFormat("dd/MM/yyyy HH:mm").format(recordEditing.getDate()));
+        } else {
+            volumeField.setText("400");
+            typeField.setValue(LiquidType.WATER);
+            dateField.setText(new SimpleDateFormat("dd/MM/yyyy HH:mm").format(new Date()));
+        }
         volumeField.setText("400");
         typeField.getItems().setAll(LiquidType.values());
         typeField.setValue(LiquidType.WATER);
@@ -81,5 +98,16 @@ public class AddRecordController {
         Parent mainGUI = loader.load();
         Stage stage = (Stage) addButton.getScene().getWindow();
         stage.setScene(new Scene(mainGUI, 580, 320));
+    }
+
+    public void setEditing(Record toEdit) {
+        editing = true;
+        recordEditing = toEdit;
+
+        addButton.setText("Done");
+
+        volumeField.setText(String.valueOf(recordEditing.getVolume()));
+        typeField.setValue(recordEditing.getLiquidType());
+        dateField.setText(new SimpleDateFormat("dd/MM/yyyy HH:mm").format(recordEditing.getDate()));
     }
 }

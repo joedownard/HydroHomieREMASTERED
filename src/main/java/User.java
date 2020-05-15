@@ -75,5 +75,24 @@ public class User {
         return true;
     }
 
+    public boolean editRecord (Record recordToEdit, String volume, LiquidType type, String date) {
+        try {
+            int newVolume = Integer.parseInt(volume);
+            Date newDate = new SimpleDateFormat("dd/MM/yyyy HH:mm").parse(date);
+
+            for (Record rec : records) {
+                if (rec.matches(recordToEdit)) {
+                    rec.setDate(newDate);
+                    rec.setLiquidType(type);
+                    rec.setVolume(newVolume);
+                    return true;
+                }
+            }
+        } catch (IllegalArgumentException | ParseException e) {
+            return false;
+        }
+        return false;
+    }
+
 
 }
