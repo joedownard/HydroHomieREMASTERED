@@ -1,9 +1,7 @@
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -13,9 +11,6 @@ import javafx.stage.Stage;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.util.List;
-import java.util.ResourceBundle;
 
 public class MainController {
 
@@ -113,7 +108,12 @@ public class MainController {
         stage.setScene(new Scene(addGoalGUI));
     }
 
-    public void graphsButtonClicked(MouseEvent mouseEvent) {
+    public void graphsButtonClicked(MouseEvent mouseEvent) throws IOException {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("graphs.fxml"));
+        Parent graphsGUI = loader.load();
+
+        Stage stage = (Stage) addRecordButton.getScene().getWindow();
+        stage.setScene(new Scene(graphsGUI));
     }
 
     public void factButtonClicked(MouseEvent mouseEvent) {
