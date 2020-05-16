@@ -2,9 +2,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
+import java.util.*;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class User {
@@ -42,21 +40,77 @@ public class User {
 
         float progress = 0f;
 
-        progress = (float)getVolumeToday() / (float)getCurrentDailyGoal().getTargetVolume();
+        progress = (float)getVolumeOn(new Date()) / (float)getCurrentDailyGoal().getTargetVolume();
 
         return progress;
     }
 
-    public int getVolumeToday () {
+    public int getVolumeOn (Date date) {
         int totalVolume = 0;
-        Date todayDate = Utils.stripDate(new Date());
+        Date strippedDate = Utils.stripDate(date);
 
         for (Record rec : records) {
-            if (Utils.stripDate(rec.getDate()).equals(todayDate)) {
+            if (Utils.stripDate(rec.getDate()).equals(strippedDate)) {
                 totalVolume += rec.getVolume();
             }
         }
         return totalVolume;
+    }
+
+    public LiquidType getFavouriteDrink () {
+        LiquidType favouriteDrink = LiquidType.WATER;
+        ArrayList<LiquidType> types = new ArrayList<>();
+        records.forEach(n -> types.add(n.getLiquidType()));
+        int currMax = Collections.frequency(types, LiquidType.WATER);
+
+        if (currMax < Collections.frequency(types, LiquidType.MILK)) {
+            currMax = Collections.frequency(types, LiquidType.MILK);
+            favouriteDrink = LiquidType.MILK;
+        }
+        if (currMax < Collections.frequency(types, LiquidType.SOUP)) {
+            currMax = Collections.frequency(types, LiquidType.SOUP);
+            favouriteDrink = LiquidType.SOUP;
+        }
+        if (currMax < Collections.frequency(types, LiquidType.SODA)) {
+            favouriteDrink = LiquidType.SODA;
+        }
+        return favouriteDrink;
+    }
+
+    public int getDailyGoalsMet () {
+        int counter = 0;
+        for (Goal goal : dailyGoals) {
+            if (goal.isCompleted()) counter++;
+        }
+        return counter;
+    }
+
+    public float getPercentageDailyGoalsMet () {
+        int goalsMet = getDailyGoalsMet();
+        int goalsSet = dailyGoals.size();
+        return ((float)goalsMet / (float)goalsSet) * 100;
+    }
+
+    public int getAverageDailyVolume () {
+        Date earliestDate = new Date();
+        for (Record rec : records) {
+            if (rec.getDate().getTime() < earliestDate.getTime()) {
+                earliestDate = rec.getDate();
+            }
+        }
+
+        earliestDate = Utils.stripDate(earliestDate);
+        Date today = Utils.stripDate(new Date());
+
+        int totalVolume = 0;
+        int daysCounter = 0;
+
+        while (earliestDate.getTime() <= today.getTime()) {
+            totalVolume += getVolumeOn(earliestDate);
+            daysCounter++;
+            earliestDate.setTime(earliestDate.getTime() + 86400000);
+        }
+        return totalVolume / daysCounter;
     }
 
     public ArrayList<Double> getLowerUpperBound () {
@@ -94,7 +148,7 @@ public class User {
             Date newDate = new SimpleDateFormat("dd/MM/yyyy HH:mm").parse(date);
 
             if (getCurrentDailyGoal() != null) {
-                if (getVolumeToday() + newVolume >= getCurrentDailyGoal().getTargetVolume() && !getCurrentDailyGoal().isCompleted()) {
+                if (getVolumeOn(new Date()) + newVolume >= getCurrentDailyGoal().getTargetVolume() && !getCurrentDailyGoal().isCompleted()) {
                     getCurrentDailyGoal().setCompleted(true);
                     points += getCurrentDailyGoal().getPoints();
                     response = Response.ADDRECSUCCESSGOALCOMPLETE;
@@ -122,16 +176,17 @@ public class User {
                     response = Response.EDITRECSUCCESS;
 
                     if (getCurrentDailyGoal() != null) {
-                        if (getVolumeToday() < getCurrentDailyGoal().getTargetVolume() && getCurrentDailyGoal().isCompleted()) {
+                        if (getVolumeOn(new Date()) < getCurrentDailyGoal().getTargetVolume() && getCurrentDailyGoal().isCompleted()) {
                             getCurrentDailyGoal().setCompleted(false);
                             response = Response.EDITRECSUCCESSGOALINCOMPLETE;
                             points -= getCurrentDailyGoal().getPoints();
 
-                        } else if (getVolumeToday() >= getCurrentDailyGoal().getTargetVolume() && !getCurrentDailyGoal().isCompleted()){
+                        } else if (getVolumeOn(new Date()) >= getCurrentDailyGoal().getTargetVolume() && !getCurrentDailyGoal().isCompleted()){
                             response = Response.EDITRECSUCCESSGOALCOMPLETE;
                             points += getCurrentDailyGoal().getPoints();
                         }
                     }
+                    break;
                 }
             }
         } catch (IllegalArgumentException | ParseException e) {
@@ -140,6 +195,29 @@ public class User {
         return response;
     }
 
+    public Response deleteRecord (Record recordToDelete) {
+        Response response = Response.DELETERECFAILURE;
+
+        for (Record rec : records) {
+            if (rec.matches(recordToDelete)) {
+                records.remove(rec);
+                response = Response.DELETERECSUCCESS;
+
+                if (getCurrentDailyGoal() != null) {
+                    if (getVolumeOn(new Date()) < getCurrentDailyGoal().getTargetVolume() && getCurrentDailyGoal().isCompleted()) {
+                        getCurrentDailyGoal().setCompleted(false);
+                        response = Response.DELETERECSUCCESSGOALINCOMPLETE;
+                        points -= getCurrentDailyGoal().getPoints();
+
+                    }
+                }
+
+                break;
+            }
+        }
+
+        return response;
+    }
 
     public Response editGoal(Goal goalEditing, String volume, String points) {
         Response response = Response.EDITGOALFAILURE;
@@ -153,12 +231,12 @@ public class User {
                     goal.setTargetVolume(newVolume);
                     goal.setPoints(newPoints);
                     response = Response.EDITGOALSUCCESS;
-                    if (getVolumeToday() < getCurrentDailyGoal().getTargetVolume() && getCurrentDailyGoal().isCompleted()) {
+                    if (getVolumeOn(new Date()) < getCurrentDailyGoal().getTargetVolume() && getCurrentDailyGoal().isCompleted()) {
                         getCurrentDailyGoal().setCompleted(false);
                         response = Response.EDITGOALSUCCESSNOWINCOMPLETE;
                         this.points -= getCurrentDailyGoal().getPoints();
 
-                    } else if (getVolumeToday() >= getCurrentDailyGoal().getTargetVolume() && !getCurrentDailyGoal().isCompleted()){
+                    } else if (getVolumeOn(new Date()) >= getCurrentDailyGoal().getTargetVolume() && !getCurrentDailyGoal().isCompleted()){
                         response = Response.EDITGOALSUCCESSNOWCOMPLETE;
                         this.points += getCurrentDailyGoal().getPoints();
                     }

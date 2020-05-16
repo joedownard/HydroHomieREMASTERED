@@ -7,6 +7,7 @@ import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
@@ -19,11 +20,27 @@ import java.util.Date;
 
 public class GraphsController {
 
+    @FXML private Label favDrinkLabel;
+    @FXML private Label goalsMetLabel;
+    @FXML private Label percentageGoalsMetLabel;
+    @FXML private Label avgDailyIntakeLabel;
     @FXML private LineChart<Number, Number> lineGraph;
     @FXML private Button viewButton;
     @FXML private CheckBox recordsCheckbox;
     @FXML private CheckBox goalsCheckbox;
     @FXML private Button exitButton;
+
+    @FXML
+    public void initialize () throws IOException {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("main.fxml"));
+        Parent mainGUI = loader.load();
+        MainController mainController = loader.getController();
+
+        favDrinkLabel.setText(mainController.getUser().getFavouriteDrink().toString());
+        goalsMetLabel.setText(String.valueOf(mainController.getUser().getDailyGoalsMet()));
+        percentageGoalsMetLabel.setText(String.format("%.0f", mainController.getUser().getPercentageDailyGoalsMet()) + "%");
+        avgDailyIntakeLabel.setText(mainController.getUser().getAverageDailyVolume() + "ml");
+    }
 
     public void viewButtonClicked(MouseEvent mouseEvent) throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("main.fxml"));

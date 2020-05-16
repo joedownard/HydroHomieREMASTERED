@@ -11,6 +11,8 @@ import javafx.stage.Stage;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Date;
+import java.util.List;
 
 public class MainController {
 
@@ -78,6 +80,23 @@ public class MainController {
     }
 
     public void deleteRecordButtonClicked(MouseEvent mouseEvent) {
+        Response response = getUser().deleteRecord(recordsTable.getSelectionModel().getSelectedItem());
+        if (response == Response.DELETERECSUCCESS) {
+
+        } else if (response == Response.DELETERECFAILURE) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Failed to delete record");
+            alert.setHeaderText(null);
+            alert.setContentText("No record selected!");
+            alert.showAndWait();
+        } else if (response == Response.DELETERECSUCCESSGOALINCOMPLETE) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Goal no longer complete!");
+            alert.setHeaderText(null);
+            alert.setContentText("Deleting this record caused you to no longer fulfill the daily goal! You have lost " + getUser().getCurrentDailyGoal().getPoints() + " points!");
+            alert.showAndWait();
+        }
+        update();
     }
 
     public void addGoalButtonClicked(MouseEvent mouseEvent) throws IOException {
@@ -133,6 +152,11 @@ public class MainController {
 
         if (getUser().getCurrentDailyGoal() != null) {
             dailyProgressBar.setProgress(getUser().getDailyGoalProgress());
+            if (getUser().getCurrentDailyGoal().isCompleted()) {
+                dailyProgressBar.setStyle("-fx-accent: green;");
+            } else {
+                dailyProgressBar.setStyle("");
+            }
             dailyGoalVolumeLabel.setText(getUser().getCurrentDailyGoal().getTargetVolume() + "ml");
         } else {
             dailyProgressBar.setVisible(false);
@@ -141,7 +165,7 @@ public class MainController {
         }
 
         pointsValueLabel.setText(String.valueOf(getUser().getPoints()));
-        volumeTodayLabel.setText(getUser().getVolumeToday() + "ml");
+        volumeTodayLabel.setText(getUser().getVolumeOn(new Date()) + "ml");
 
         if (!user.getRecords().isEmpty()) {
             recordsTable.getItems().setAll(user.getRecords());
