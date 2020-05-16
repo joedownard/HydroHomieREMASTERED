@@ -92,7 +92,7 @@ public class AddRecordController {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Goal no longer complete!");
             alert.setHeaderText(null);
-            alert.setContentText("Editing this record caused you to not fulfill the daily goal! You have lost "+ mainController.getUser().getCurrentDailyGoal().getPoints() + " points!");
+            alert.setContentText("Editing this record caused you to no longer fulfill the daily goal! You have lost "+ mainController.getUser().getCurrentDailyGoal().getPoints() + " points!");
             alert.showAndWait();
         }
 

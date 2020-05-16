@@ -142,7 +142,7 @@ public class User {
 
 
     public Response editGoal(Goal goalEditing, String volume, String points) {
-        if (getCurrentDailyGoal() == null) return Response.EDITGOALFAILURE;
+        Response response = Response.EDITGOALFAILURE;
 
         try {
             int newVolume = Integer.parseInt(volume);
@@ -152,12 +152,21 @@ public class User {
                 if (goal.matches(goalEditing)) {
                     goal.setTargetVolume(newVolume);
                     goal.setPoints(newPoints);
-                    return Response.EDITGOALSUCCESS;
+                    response = Response.EDITGOALSUCCESS;
+                    if (getVolumeToday() < getCurrentDailyGoal().getTargetVolume() && getCurrentDailyGoal().isCompleted()) {
+                        getCurrentDailyGoal().setCompleted(false);
+                        response = Response.EDITGOALSUCCESSNOWINCOMPLETE;
+                        this.points -= getCurrentDailyGoal().getPoints();
+
+                    } else if (getVolumeToday() >= getCurrentDailyGoal().getTargetVolume() && !getCurrentDailyGoal().isCompleted()){
+                        response = Response.EDITGOALSUCCESSNOWCOMPLETE;
+                        this.points += getCurrentDailyGoal().getPoints();
+                    }
                 }
             }
         } catch (IllegalArgumentException e) {
-            return Response.EDITGOALFAILURE;
+            response =  Response.EDITGOALFAILURE;
         }
-        return Response.EDITGOALFAILURE;
+        return response;
     }
 }

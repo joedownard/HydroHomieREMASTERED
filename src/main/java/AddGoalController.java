@@ -67,9 +67,21 @@ public class AddGoalController {
             alert.showAndWait();
         } else if (response == Response.EDITGOALFAILURE){
             Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Failed to ediy goal!");
+            alert.setTitle("Failed to edit goal!");
             alert.setHeaderText(null);
             alert.setContentText("Failed to edit goal.");
+            alert.showAndWait();
+        } else if (response == Response.EDITGOALSUCCESSNOWCOMPLETE) {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Goal complete!");
+            alert.setHeaderText(null);
+            alert.setContentText("You have reached your daily goal! You have been awarded " + mainController.getUser().getCurrentDailyGoal().getPoints() + " points!");
+            alert.showAndWait();
+        } else if (response == Response.EDITGOALSUCCESSNOWINCOMPLETE) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Goal no longer complete!");
+            alert.setHeaderText(null);
+            alert.setContentText("Editing this goal caused you to no longer fulfill the daily goal! You have lost "+ mainController.getUser().getCurrentDailyGoal().getPoints() + " points!");
             alert.showAndWait();
         }
         mainController.update();
