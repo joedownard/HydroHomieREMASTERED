@@ -32,7 +32,7 @@ public class AddRecordController {
         editing = false;
         recordEditing = null;
 
-        volumeField.setText("400");
+        volumeField.setText("400"); // Provide some default values
         typeField.getItems().setAll(LiquidType.values());
         typeField.setValue(LiquidType.WATER);
         dateField.setText(new SimpleDateFormat("dd/MM/yyyy HH:mm").format(new Date()));
@@ -46,7 +46,7 @@ public class AddRecordController {
 
 
         try {
-            Integer.parseInt(volumeField.getText());
+            Integer.parseInt(volumeField.getText()); // Check the content of the field can be converted to an integer
             new SimpleDateFormat("dd/MM/yyyy HH:mm").parse(dateField.getText());
         } catch (IllegalArgumentException e) {
             volumeErrorLabel.setText("Invalid volume!");
@@ -60,10 +60,12 @@ public class AddRecordController {
 
         MainController mainController =  loader.getController();
         if (editing) {
-            response = mainController.getUser().editRecord(recordEditing, volumeField.getText(), typeField.getValue(), dateField.getText());
+            response = mainController.getUser().editRecord(recordEditing, volumeField.getText(), typeField.getValue(), dateField.getText());  // Attempt to edit the record in the "backend" and get the response
         } else {
             response = mainController.getUser().addRecord(volumeField.getText(), typeField.getValue(), dateField.getText());
         }
+
+        // Process the response from the "backend" and inform the user correspondingly
         if (response == Response.ADDRECSUCCESSGOALCOMPLETE) {
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("Goal complete!");
@@ -103,11 +105,11 @@ public class AddRecordController {
     }
 
     public void resetButtonClicked(MouseEvent mouseEvent) {
-        if (editing) {
+        if (editing) { // Restore original values if editing
             volumeField.setText(String.valueOf(recordEditing.getVolume()));
             typeField.setValue(recordEditing.getLiquidType());
             dateField.setText(new SimpleDateFormat("dd/MM/yyyy HH:mm").format(recordEditing.getDate()));
-        } else {
+        } else { // Restore default values if not
             volumeField.setText("400");
             typeField.setValue(LiquidType.WATER);
             dateField.setText(new SimpleDateFormat("dd/MM/yyyy HH:mm").format(new Date()));
@@ -119,10 +121,11 @@ public class AddRecordController {
         Parent mainGUI = loader.load();
 
         Stage stage = (Stage) addButton.getScene().getWindow();
-        stage.setScene(new Scene(mainGUI, 580, 320));
+        stage.setScene(new Scene(mainGUI, 580, 320)); // Return to main window without changing anything
     }
 
     public void setEditing(Record toEdit) {
+        // Function to be called when switching to this scene to set editing mode
         editing = true;
         recordEditing = toEdit;
 

@@ -17,6 +17,7 @@ public class Goal {
         this.creationDate = Utils.stripDate(new Date());
     }
 
+    // Check if the goal matches the one passed
     public boolean matches (Goal goal) {
         return this.getTargetVolume() == goal.getTargetVolume() && this.getPoints() == goal.getPoints() && this.getCreationDate().getTime() == goal.getCreationDate().getTime();
     }

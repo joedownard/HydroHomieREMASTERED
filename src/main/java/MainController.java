@@ -39,7 +39,7 @@ public class MainController {
 
     @FXML private ProgressBar dailyProgressBar;
 
-    User user;
+    private User user;
 
     @FXML
     public void initialize() {
@@ -60,7 +60,7 @@ public class MainController {
     }
 
     public void editRecordButtonClicked(MouseEvent mouseEvent) throws IOException {
-        if (recordsTable.getSelectionModel().getSelectedItem() == null) {
+        if (recordsTable.getSelectionModel().getSelectedItem() == null) { // Deal with an error in selecting an item
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Failed to edit record");
             alert.setHeaderText(null);
@@ -72,7 +72,7 @@ public class MainController {
         Parent addRecordGUI = loader.load();
 
         AddRecordController addRecordController = loader.getController();
-        addRecordController.setEditing(recordsTable.getSelectionModel().getSelectedItem());
+        addRecordController.setEditing(recordsTable.getSelectionModel().getSelectedItem()); // Set the mode to editing
 
         Stage stage = (Stage) addRecordButton.getScene().getWindow();
         stage.setScene(new Scene(addRecordGUI));
@@ -80,9 +80,10 @@ public class MainController {
     }
 
     public void deleteRecordButtonClicked(MouseEvent mouseEvent) {
-        Response response = getUser().deleteRecord(recordsTable.getSelectionModel().getSelectedItem());
+        Response response = getUser().deleteRecord(recordsTable.getSelectionModel().getSelectedItem()); // Attempt to delete the record and get the record
+        // Deal with the response
         if (response == Response.DELETERECSUCCESS) {
-
+            // For completeness so all the cases are explicitly dealt with
         } else if (response == Response.DELETERECFAILURE) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Failed to delete record");
@@ -121,7 +122,7 @@ public class MainController {
         Parent addGoalGUI = loader.load();
 
         AddGoalController addGoalController = loader.getController();
-        addGoalController.setEditing(getUser().getCurrentDailyGoal());
+        addGoalController.setEditing(getUser().getCurrentDailyGoal()); // Set editing mode
 
         Stage stage = (Stage) addGoalButton.getScene().getWindow();
         stage.setScene(new Scene(addGoalGUI));
@@ -148,17 +149,21 @@ public class MainController {
     }
 
     public void update () {
-        writeToFile();
+        writeToFile(); // Save data to a file
 
-        if (getUser().getCurrentDailyGoal() != null) {
+        if (getUser().getCurrentDailyGoal() != null) { // Update the daily goal stats
+            dailyProgressBar.setVisible(true);
+            dailyGoalVolumeLabel.setVisible(true);
+            dailyGoalLabel.setVisible(true);
+
             dailyProgressBar.setProgress(getUser().getDailyGoalProgress());
             if (getUser().getCurrentDailyGoal().isCompleted()) {
-                dailyProgressBar.setStyle("-fx-accent: green;");
+                dailyProgressBar.setStyle("-fx-accent: green;"); // Make the bar green if its complete
             } else {
                 dailyProgressBar.setStyle("");
             }
             dailyGoalVolumeLabel.setText(getUser().getCurrentDailyGoal().getTargetVolume() + "ml");
-        } else {
+        } else { // If there is no daily goal, hide all the related visual items
             dailyProgressBar.setVisible(false);
             dailyGoalVolumeLabel.setVisible(false);
             dailyGoalLabel.setVisible(false);
@@ -179,10 +184,10 @@ public class MainController {
         ObjectMapper objectMapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
 
         File directory = new File(System.getProperty("user.home") + "\\Hydrohomie");
-        if (!directory.exists()) directory.mkdir();
+        if (!directory.exists()) directory.mkdir(); // Ensure the directory exists
 
         try {
-            objectMapper.writeValue(new File(System.getProperty("user.home") + "\\Hydrohomie\\user.json"), user);
+            objectMapper.writeValue(new File(System.getProperty("user.home") + "\\Hydrohomie\\user.json"), user); // Write the data to a JSON file
         } catch (IOException e) {
             e.printStackTrace();
         }

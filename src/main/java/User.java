@@ -30,7 +30,7 @@ public class User {
     public Goal getCurrentDailyGoal () {
         Date todayDate = Utils.stripDate(new Date());
         for (Goal goal : dailyGoals) {
-            if (goal.getCreationDate().equals(todayDate)) return goal;
+            if (goal.getCreationDate().equals(todayDate)) return goal; // Find the relevant goal and return it
         }
         return null;
     }
@@ -40,7 +40,7 @@ public class User {
 
         float progress = 0f;
 
-        progress = (float)getVolumeOn(new Date()) / (float)getCurrentDailyGoal().getTargetVolume();
+        progress = (float)getVolumeOn(new Date()) / (float)getCurrentDailyGoal().getTargetVolume(); // Calculate progress on daily goal by collating total volume on the day and dividing by target volume
 
         return progress;
     }
@@ -51,13 +51,14 @@ public class User {
 
         for (Record rec : records) {
             if (Utils.stripDate(rec.getDate()).equals(strippedDate)) {
-                totalVolume += rec.getVolume();
+                totalVolume += rec.getVolume(); // Add up all the volume of water drank on the day
             }
         }
         return totalVolume;
     }
 
     public LiquidType getFavouriteDrink () {
+        // Go through all the records and find which drink has the highest usage frequency
         LiquidType favouriteDrink = LiquidType.WATER;
         ArrayList<LiquidType> types = new ArrayList<>();
         records.forEach(n -> types.add(n.getLiquidType()));
@@ -80,7 +81,7 @@ public class User {
     public int getDailyGoalsMet () {
         int counter = 0;
         for (Goal goal : dailyGoals) {
-            if (goal.isCompleted()) counter++;
+            if (goal.isCompleted()) counter++; // Count the number of goals completed
         }
         return counter;
     }
@@ -92,6 +93,7 @@ public class User {
     }
 
     public int getAverageDailyVolume () {
+        // Go through every day for which a record is recorded and find the total volume and then find the average daily volume
         Date earliestDate = new Date();
         for (Record rec : records) {
             if (rec.getDate().getTime() < earliestDate.getTime()) {
@@ -114,6 +116,7 @@ public class User {
     }
 
     public ArrayList<Double> getLowerUpperBound () {
+        // Go through all the records and find the earliest date where a record was recorded
         double min = new Date().getTime();
         double max = 0d;
         for (Record rec : records) {
@@ -128,20 +131,25 @@ public class User {
     }
 
     public Response addGoal (String volume, String points) {
-        if (getCurrentDailyGoal() != null) return Response.ADDGOALFAILURE;
+        // Attempt to add a goal and return the response
+        Response response = Response.ADDGOALSUCCESS;
+        if (getCurrentDailyGoal() != null) {
+            response = Response.ADDGOALFAILURE;
+        } else {
+            try {
+                int newVolume = Integer.parseInt(volume);
+                int newPoints = Integer.parseInt(points);
 
-        try {
-            int newVolume = Integer.parseInt(volume);
-            int newPoints = Integer.parseInt(points);
-
-            dailyGoals.add(new Goal(newVolume, newPoints));
-        } catch (IllegalArgumentException e) {
-            return Response.ADDGOALFAILURE;
+                dailyGoals.add(new Goal(newVolume, newPoints));
+            } catch (IllegalArgumentException e) {
+                response = Response.ADDGOALFAILURE;
+            }
         }
-        return Response.ADDGOALSUCCESS;
+        return response;
     }
 
     public Response addRecord (String volume, LiquidType type, String date) {
+        // Attempt to add a record and return the response
         Response response = Response.ADDRECSUCCESS;
         try {
             int newVolume = Integer.parseInt(volume);
@@ -163,6 +171,7 @@ public class User {
     }
 
     public Response editRecord (Record recordToEdit, String volume, LiquidType type, String date) {
+        // Attempt to edit a record and return the response
         Response response = Response.EDITRECFAILURE;
         try {
             int newVolume = Integer.parseInt(volume);
@@ -196,6 +205,7 @@ public class User {
     }
 
     public Response deleteRecord (Record recordToDelete) {
+        // Attempt to delete a record and return the response
         Response response = Response.DELETERECFAILURE;
 
         for (Record rec : records) {
@@ -208,10 +218,8 @@ public class User {
                         getCurrentDailyGoal().setCompleted(false);
                         response = Response.DELETERECSUCCESSGOALINCOMPLETE;
                         points -= getCurrentDailyGoal().getPoints();
-
                     }
                 }
-
                 break;
             }
         }
@@ -220,6 +228,7 @@ public class User {
     }
 
     public Response editGoal(Goal goalEditing, String volume, String points) {
+        // Attempt to edit a goal and return the response
         Response response = Response.EDITGOALFAILURE;
 
         try {

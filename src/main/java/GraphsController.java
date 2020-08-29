@@ -51,6 +51,7 @@ public class GraphsController {
         ArrayList<Goal> dailyGoals = mainController.getUser().getDailyGoals();
         ArrayList<Double> lowerUpperBound = mainController.getUser().getLowerUpperBound();
 
+        // Set some custom properties of the graph to render the graph properly
         ((NumberAxis) lineGraph.getXAxis()).setTickLabelFormatter(stringConverter);
         lineGraph.getXAxis().setAutoRanging(false);
         ((NumberAxis) lineGraph.getXAxis()).setTickUnit(3600000d);
@@ -65,7 +66,10 @@ public class GraphsController {
         recordSeries.setName("Records");
         goalSeries.setName("Goals");
 
+        // Ensure the graph data is empty before adding to it
         lineGraph.getData().clear();
+
+        // Add the data to the data series
         records.forEach(rec -> recordSeries.getData().add(new XYChart.Data<Number, Number>(rec.getDate().getTime(), rec.getVolume())));
         dailyGoals.forEach(goal -> goalSeries.getData().add(new XYChart.Data<Number, Number>(goal.getCreationDate().getTime(), goal.getTargetVolume())));
 
@@ -89,6 +93,7 @@ public class GraphsController {
         stage.setScene(new Scene(mainGUI, 580, 320));
     }
 
+    // Custom String Converter to properly deal with dates
     StringConverter<Number> stringConverter = new StringConverter<Number>() {
         @Override
         public String toString(Number object) {

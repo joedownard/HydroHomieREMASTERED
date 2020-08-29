@@ -20,6 +20,7 @@ public class Record {
         this.volume = newVolume;
     }
 
+    // Checks if this record matches the record passed to the function
     public boolean matches (Record rec) {
         return this.getVolume() == rec.getVolume() && this.getLiquidType() == rec.getLiquidType() && this.getDate().getTime() == rec.getDate().getTime();
     }

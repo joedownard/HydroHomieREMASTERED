@@ -27,7 +27,7 @@ public class AddGoalController {
         editing = false;
         goalEditing = null;
 
-        volumeField.setText("2000");
+        volumeField.setText("2000"); // Provide some default values
         pointsField.setText("10");
     }
 
@@ -37,9 +37,9 @@ public class AddGoalController {
         Parent mainGUI = loader.load();
 
         try {
-            Integer.parseInt(volumeField.getText());
+            Integer.parseInt(volumeField.getText()); // Check the content of the field can be converted to an integer
         } catch (IllegalArgumentException e) {
-            volumeErrorLabel.setText("Invalid volume!");
+            volumeErrorLabel.setText("Invalid volume!"); // Inform the user of the error
             volumeErrorLabel.setTextFill(Color.color(1, 0 , 0));
             return;
         }
@@ -54,11 +54,12 @@ public class AddGoalController {
 
         MainController mainController =  loader.getController();
         if (editing) {
-            response = mainController.getUser().editGoal(goalEditing, volumeField.getText(), pointsField.getText());
+            response = mainController.getUser().editGoal(goalEditing, volumeField.getText(), pointsField.getText()); // Attempt to edit the goal in the "backend" and get the response
         } else {
             response = mainController.getUser().addGoal(volumeField.getText(), pointsField.getText());
         }
 
+        // Process the response from the "backend" and inform the user correspondingly
         if (response == Response.ADDGOALFAILURE) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Failed to create goal!");
@@ -91,10 +92,10 @@ public class AddGoalController {
     }
 
     public void resetButtonClicked(MouseEvent mouseEvent) {
-        if (editing) {
+        if (editing) { // Restore original values if editing
             volumeField.setText(String.valueOf(goalEditing.getTargetVolume()));
             pointsField.setText(String.valueOf(goalEditing.getPoints()));
-        } else {
+        } else { // Restore default values if not
             volumeField.setText("2000");
             pointsField.setText("10");
         }
@@ -104,10 +105,11 @@ public class AddGoalController {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("main.fxml"));
         Parent mainGUI = loader.load();
         Stage stage = (Stage) addButton.getScene().getWindow();
-        stage.setScene(new Scene(mainGUI, 580, 320));
+        stage.setScene(new Scene(mainGUI, 580, 320)); // Return to main window without changing anything
     }
 
     public void setEditing(Goal toEdit) {
+        // Function to be called when switching to this scene to set editing mode
         editing = true;
         goalEditing = toEdit;
 
